@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sui sentieri degli Gnomi
 
-## Getting Started
+Caccia al tesoro narrata nel Parco della Villa Reale di Monza per bambini dai 3 ai 5 anni, da vivere a piedi con lo smartphone in mano a un adulto. Web app mobile-first, installabile come PWA.
 
-First, run the development server:
+Specifica completa: [`docs/specifiche.md`](docs/specifiche.md).
+
+## Il percorso
+
+Circa 1,65 km, partenza da **Cascina Bastia** (la casa di Bastiano, lo gnomo custode).
+
+| # | Tappa | Tema | Ricompensa |
+|---|---|---|---|
+| — | Cascina Bastia | Prologo | — |
+| 1 | Faggio delle Streghe | Streghe | 🍃 Foglia magica |
+| 2 | Torretta Viscontea | Poesia | ✨ Parola segreta |
+| 3 | Laghetto Giardini Reali | Ondine | 💧 Goccia luminosa |
+| 4 | Caverna dei Coboldi | Coboldi | 🪨 Pietra dei coboldi |
+| 5 | Due querce | Formula finale | 🌰 Ghianda d'oro + diploma |
+
+Il tracciato viene dalla mappa Google My Maps del progetto (`docs/source/`) ed è in `content/route.geo.json`. **Nessun punto è ancora verificato sul posto** (`verifiedOnSite: false`): l'app lo segnala con un avviso.
+
+## Sviluppo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm test         # logica di gioco: geofencing, indizi, motore
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Il GPS del browser richiede HTTPS (o `localhost`). Per provare su telefono usate il deploy Vercel, oppure in Chrome DevTools → Sensors per simulare la posizione.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Struttura
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+content/   missions.it.json (testi, indizi, attività) · route.geo.json (tracciato e tappe)
+game/      geo · geofencing · hints · engine · progress · content
+components/ Adventure (schermate) · map/MapView · audio/Narration
+public/    sw.js (PWA) · manifest · audio/it/ (file narrati, da produrre)
+tests/     test della logica di gioco
+```
 
-## Learn More
+Contenuti, coordinate, regole e UI sono separati: per cambiare un testo si tocca solo `content/missions.it.json`, per spostare una tappa solo `content/route.geo.json`.
 
-To learn more about Next.js, take a look at the following resources:
+## Regole di gioco (configurabili)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Soglie in `game/geofencing.ts` e `game/hints.ts`, da calibrare sul campo:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Arrivo**: entro 35 m dal punto di sosta, con GPS ≤ 30 m; serve una lettura chiaramente dentro il raggio o due consecutive. L'apertura della missione è sempre confermata dall'adulto.
+- **Deviazione**: 3 letture attendibili a oltre 50 m dal sentiero; si rientra sotto i 30 m. L'app indica l'ultimo punto del vialetto in cui eravate, senza tracciare scorciatoie.
+- **Indizi**: base subito; dopo 3 e 6 minuti senza avvicinarsi di almeno 20 m; uno di prossimità entro 80 m; fuori rotta solo la base. «Nuovo indizio» ne rivela uno alla volta.
 
-## Deploy on Vercel
+## Stato e cose da fare
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] **Sopralluogo**: verificare tappe, punti di sosta e raggi, poi mettere `verifiedOnSite: true` (vedi `docs/field-survey.md`).
+- [ ] **Testi**: le missioni sono bozze editoriali da approvare.
+- [ ] **Audio**: mancano i file in `public/audio/it/`. Finché non ci sono, l'app usa la voce sintetica del telefono (etichetta «voce provvisoria»).
+- [ ] **Illustrazioni**: per ora emoji al posto di personaggi e ricompense.
+- [ ] **Mappe offline**: vedi `docs/mappe.md`.
+- [ ] Privacy notice prima della pubblicazione.

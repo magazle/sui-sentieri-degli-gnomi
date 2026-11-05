@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "status": "bozza editoriale, da approvare",
+  "narrator": "Bastiano, lo gnomo custode di Cascina Bastia",
+  "prologue": {
+    "title": "Il custode del bosco",
+    "text": "Psst! Piccoli esploratori, sono qui! Sono Bastiano, lo gnomo che custodisce questa vecchia cascina. Stanotte è successa una cosa strana: il bosco ha perso cinque piccoli segreti magici. Senza di loro gli alberi non sanno più cantare. Mi aiutate a ritrovarli? Il primo lo custodiscono le streghe gentili, vicino a un grande albero qui dietro. Andiamo, piano piano, con gli occhi aperti!",
+    "audioSrc": "/audio/it/prologo.mp3"
+  },
+  "missions": [
+    {
+      "id": "m1",
+      "order": 1,
+      "title": "Il Faggio delle Streghe",
+      "character": "Le streghe gentili",
+      "rewardId": "foglia",
+      "activationRadiusMeters": 35,
+      "safeStopDescription": "Fermatevi sul vialetto davanti al grande faggio, senza entrare nell'erba alta.",
+      "introductionText": "Ecco il faggio delle streghe! Le streghe gentili ci vivono da tantissimo tempo. Quando il vento soffia, le sue foglie fanno shhh, shhh. Le streghe ci daranno il primo segreto solo se sappiamo parlare la loro lingua: quella delle foglie.",
+      "introductionAudioSrc": "/audio/it/m1-intro.mp3",
+      "activity": {
+        "type": "observe",
+        "prompt": "Guardate il grande albero: è il più grosso qui intorno? Adesso diventiamo foglie: alziamo le braccia e facciamo tutti insieme shhh, shhh, come il vento. Più piano... più forte... e di nuovo piano!",
+        "adultNote": "Se vedete cerchi di funghi nel prato, sono i cerchi delle fate: si guardano da lontano, non si calpestano. Se non ci sono, le fate stanno dormendo."
+      },
+      "conclusionText": "Bravissimi! Le streghe vi hanno sentito e vi regalano la foglia magica. Torniamo da Bastiano a fargliela vedere: lui sa dove andare dopo.",
+      "hints": [
+        { "id": "m1-h1", "text": "Bastiano dice: le streghe abitano vicino all'albero più grande. Seguite il vialetto verso il bosco." },
+        { "id": "m1-h2", "afterSeconds": 180, "text": "Cercate un albero enorme con la corteccia liscia e grigia, come la pelle di un elefante." },
+        { "id": "m1-h3", "afterSeconds": 360, "text": "Il faggio è poco più avanti sul vialetto, a destra. Adulti: controllate la X sulla mappa." },
+        { "id": "m1-h4", "withinMeters": 80, "text": "Sento le foglie che sussurrano... siamo vicinissimi!" }
+      ]
+    },
+    {
+      "id": "m2",
+      "order": 2,
+      "title": "La Torretta della parola segreta",
+      "character": "Il poeta della torretta",
+      "rewardId": "parola",
+      "activationRadiusMeters": 35,
+      "safeStopDescription": "Fermatevi sul vialetto davanti alla torretta.",
+      "introductionText": "Questa è la torretta! Qui abita un vecchio poeta che conosce una parola segreta. Ma la regala solo a chi sa ripetere la sua filastrocca. Ascoltate bene!",
+      "introductionAudioSrc": "/audio/it/m2-intro.mp3",
+      "activity": {
+        "type": "repeat",
+        "prompt": "Ripetete con me, una riga alla volta: «Foglia, foglia, vola via, porta il bosco a casa mia. Gnomo, gnomo, piccolino, dimmi tu il cammino!»",
+        "adultNote": "Ripetete la filastrocca insieme ai bambini una riga alla volta, anche due o tre volte."
+      },
+      "conclusionText": "Che voce magica! Il poeta vi regala la parola segreta: CAMMINO. Tenetela a mente, servirà alla fine.",
+      "hints": [
+        { "id": "m2-h1", "text": "Bastiano dice: il poeta vive in alto, in una piccola torre di mattoni. Ripassate davanti alla cascina e proseguite." },
+        { "id": "m2-h2", "afterSeconds": 180, "text": "Cercate una torre piccola e rotonda, più alta degli alberi bassi." },
+        { "id": "m2-h3", "afterSeconds": 360, "text": "La Torretta Viscontea è sul vialetto verso destra dopo la cascina. Adulti: seguite la linea gialla." },
+        { "id": "m2-h4", "withinMeters": 80, "text": "Alzate gli occhi: vedete la torretta?" }
+      ]
+    },
+    {
+      "id": "m3",
+      "order": 3,
+      "title": "Il Laghetto delle Ondine",
+      "character": "Le ondine",
+      "rewardId": "goccia",
+      "activationRadiusMeters": 35,
+      "safeStopDescription": "Fermatevi sul vialetto, dalla parte esterna della recinzione del laghetto.",
+      "introductionText": "Sentite? È l'acqua del laghetto. Qui vivono le ondine, piccole fate d'acqua che non si fanno mai vedere. Si fanno solo sentire. Restiamo qui sul vialetto, in silenzio, e ascoltiamo.",
+      "introductionAudioSrc": "/audio/it/m3-intro.mp3",
+      "activity": {
+        "type": "choice",
+        "prompt": "Le ondine fanno un suono. Quale sarà? Il clic-clac del sasso, il plin-plon della goccia o il bum-bum del tamburo?",
+        "options": ["Clic-clac", "Plin-plon", "Bum-bum"],
+        "correctOption": 1,
+        "adultNote": "Restate sul vialetto, fuori dalla recinzione. Qualunque risposta va bene: poi si sceglie insieme il plin-plon."
+      },
+      "conclusionText": "Plin-plon! Le ondine sono felici e vi regalano una goccia luminosa.",
+      "hints": [
+        { "id": "m3-h1", "text": "Bastiano dice: le ondine abitano dove c'è l'acqua. Seguite il vialetto che scende." },
+        { "id": "m3-h2", "afterSeconds": 180, "text": "Cercate un tempietto bianco con le colonne, vicino all'acqua." },
+        { "id": "m3-h3", "afterSeconds": 360, "text": "Il laghetto è a sinistra del vialetto. Adulti: fermatevi sul percorso, non avvicinatevi alla riva." },
+        { "id": "m3-h4", "withinMeters": 80, "text": "Sento l'acqua... le ondine sono qui vicino!" }
+      ]
+    },
+    {
+      "id": "m4",
+      "order": 4,
+      "title": "La Caverna dei Coboldi",
+      "character": "I coboldi",
+      "rewardId": "pietra",
+      "activationRadiusMeters": 35,
+      "safeStopDescription": "Fermatevi sul vialetto vicino alla caverna, senza entrare e senza salire sulle rocce.",
+      "introductionText": "Questa è la caverna dei coboldi! I coboldi sono piccoli e timidi, e un po' dispettosi. Hanno nascosto il loro segreto e lo sorvegliano con tre pietre magiche. Chi è abbastanza coraggioso da trovarle... solo con gli occhi?",
+      "introductionAudioSrc": "/audio/it/m4-intro.mp3",
+      "activity": {
+        "type": "observe",
+        "prompt": "Contiamo insieme con il dito: una pietra... due pietre... tre pietre! Non si toccano e non si spostano: i coboldi ci guardano!",
+        "adultNote": "Aiutate i bambini a individuare tre pietre dal vialetto. Nessuno entra nella caverna e nessuno sale sulle rocce."
+      },
+      "conclusionText": "Che coraggio! I coboldi escono un attimo a salutarvi e vi regalano una pietra magica. Manca solo l'ultimo segreto!",
+      "hints": [
+        { "id": "m4-h1", "text": "Bastiano dice: i coboldi vivono sotto terra, in un posto fatto di rocce. Seguite il vialetto." },
+        { "id": "m4-h2", "afterSeconds": 180, "text": "Cercate un mucchio di grandi rocce, con un buco scuro come una porta." },
+        { "id": "m4-h3", "afterSeconds": 360, "text": "La caverna è su un piccolo giro a destra del vialetto principale. Adulti: controllate la X sulla mappa." },
+        { "id": "m4-h4", "withinMeters": 80, "text": "Shhh... i coboldi sono qui vicino. Camminiamo in punta di piedi!" }
+      ]
+    },
+    {
+      "id": "m5",
+      "order": 5,
+      "title": "Le due Querce",
+      "character": "Le querce gemelle",
+      "rewardId": "ghianda",
+      "activationRadiusMeters": 35,
+      "safeStopDescription": "Fermatevi sul vialetto davanti alle due querce.",
+      "introductionText": "Eccole, le due querce gemelle! Sono le più vecchie e sagge del bosco. Hanno l'ultimo segreto, ma prima vogliono sentire la formula magica, con tutti i segreti che avete raccolto.",
+      "introductionAudioSrc": "/audio/it/m5-intro.mp3",
+      "activity": {
+        "type": "repeat",
+        "prompt": "Prendiamoci per mano e ripetiamo forte: «Foglia, goccia, pietra e CAMMINO: bosco, bosco, torna vicino!»",
+        "adultNote": "La parola CAMMINO è quella della torretta: aiutate i bambini a ricordarla."
+      },
+      "conclusionText": "Le querce hanno sentito! Il bosco ricomincia a cantare. Ecco l'ultimo segreto: la ghianda d'oro.",
+      "hints": [
+        { "id": "m5-h1", "text": "Bastiano dice: l'ultimo segreto è tra due alberi grandi grandi, uno accanto all'altro." },
+        { "id": "m5-h2", "afterSeconds": 180, "text": "Cercate due querce gemelle vicino ai giardini aperti." },
+        { "id": "m5-h3", "afterSeconds": 360, "text": "Le querce sono alla fine del vialetto verso i giardini. Adulti: seguite la linea gialla fino in fondo." },
+        { "id": "m5-h4", "withinMeters": 80, "text": "Le vedete? Due alberi gemelli, proprio lì!" }
+      ]
+    }
+  ],
+  "rewards": {
+    "foglia": { "name": "Foglia magica", "emoji": "🍃" },
+    "parola": { "name": "Parola segreta", "emoji": "✨" },
+    "goccia": { "name": "Goccia luminosa", "emoji": "💧" },
+    "pietra": { "name": "Pietra dei coboldi", "emoji": "🪨" },
+    "ghianda": { "name": "Ghianda d'oro", "emoji": "🌰" }
+  },
+  "finale": {
+    "title": "Custodi del bosco!",
+    "text": "Ce l'avete fatta! Avete ritrovato tutti e cinque i segreti e il bosco canta di nuovo. Da oggi siete ufficialmente custodi del bosco. Bastiano vi aspetta alla cascina per festeggiare: tornate a trovarlo quando volete!",
+    "audioSrc": "/audio/it/finale.mp3"
+  }
+}

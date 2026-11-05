@@ -1,0 +1,12 @@
+{
+  "name": "Sui sentieri degli Gnomi",
+  "short_name": "Gnomi",
+  "description": "Caccia al tesoro narrata nel Parco di Monza per bambini dai 3 ai 5 anni.",
+  "lang": "it",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f0e1",
+  "theme_color": "#2f4a2b",
+  "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
