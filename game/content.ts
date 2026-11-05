@@ -2,10 +2,19 @@ import missionsJson from "@/content/missions.it.json";
 import routeJson from "@/content/route.geo.json";
 import { lineLength, nearestOnLine, type LngLat } from "./geo";
 
-export type Hint = { id: string; text: string; audioSrc?: string; afterSeconds?: number; withinMeters?: number };
+/** Una battuta detta da un personaggio. `id` dà il nome al file audio: /audio/it/<id>.mp3 */
+export type Line = { id: string; speaker: CharacterId; text: string; audioSrc: string };
+export type CharacterId = "bastiano" | "fagiolina" | "rimario" | "plin" | "sassolino" | "querce";
+export type Character = {
+  name: string;
+  role: string;
+  voiceDirection: string;
+  tts: { gender: "male" | "female"; pitch: number; rate: number };
+};
+export type Hint = { id: string; afterSeconds?: number; withinMeters?: number; line: Line; text: string };
 export type Activity = {
   type: "observe" | "repeat" | "choice";
-  prompt: string;
+  lines: Line[];
   options?: string[];
   correctOption?: number;
   adultNote?: string;
@@ -14,14 +23,13 @@ export type Mission = {
   id: string;
   order: number;
   title: string;
-  character: string;
+  characterId: CharacterId;
   rewardId: string;
   activationRadiusMeters: number;
   safeStopDescription: string;
-  introductionText: string;
-  introductionAudioSrc?: string;
+  intro: Line[];
   activity: Activity;
-  conclusionText: string;
+  conclusion: Line[];
   hints: Hint[];
   /** Punto segnato sulla mappa (elemento da cercare). */
   location: LngLat;
@@ -56,12 +64,28 @@ const start = points.get("start");
 if (!start) throw new Error("route.geojson: manca il punto di partenza (id 'start')");
 export const startPoint = start.coord;
 
-const raw = missionsJson as unknown as {
-  prologue: { title: string; text: string; audioSrc?: string };
-  missions: Omit<Mission, "location" | "safeStop" | "leg" | "verifiedOnSite">[];
-  rewards: Record<string, Reward>;
-  finale: { title: string; text: string; audioSrc?: string };
+type RawLine = { speaker: CharacterId; text: string };
+type RawMission = Omit<Mission, "location" | "safeStop" | "leg" | "verifiedOnSite" | "intro" | "activity" | "conclusion" | "hints"> & {
+  intro: RawLine[];
+  activity: Omit<Activity, "lines"> & { lines: RawLine[] };
+  conclusion: RawLine[];
+  hints: (RawLine & { id: string; afterSeconds?: number; withinMeters?: number })[];
 };
+const raw = missionsJson as unknown as {
+  characters: Record<CharacterId, Character>;
+  prologue: { title: string; lines: RawLine[] };
+  missions: RawMission[];
+  rewards: Record<string, Reward>;
+  finale: { title: string; lines: RawLine[] };
+};
+
+export const characters = raw.characters;
+
+const toLine = (id: string, l: RawLine): Line => {
+  if (!raw.characters[l.speaker]) throw new Error(`missions.it.json: personaggio sconosciuto "${l.speaker}" in ${id}`);
+  return { id, speaker: l.speaker, text: l.text, audioSrc: `/audio/it/${id}.mp3` };
+};
+const toLines = (prefix: string, ls: RawLine[]) => ls.map((l, i) => toLine(`${prefix}-${i + 1}`, l));
 
 // Le tappe si agganciano al percorso in sequenza: il tracciato ripassa sugli
 // stessi viali (Bastia → Faggio → Bastia), quindi la ricerca riparte sempre
@@ -77,11 +101,28 @@ export const missions: Mission[] = [...raw.missions]
     const leg = { fromSegment: prevSegment, toSegment: near.segmentIndex, startAlong: prevAlong, endAlong: near.along };
     prevSegment = near.segmentIndex;
     prevAlong = near.along;
-    return { ...m, location: p.coord, safeStop: near.point, leg, verifiedOnSite: p.verified };
+    return {
+      ...m,
+      intro: toLines(`${m.id}-intro`, m.intro),
+      activity: { ...m.activity, lines: toLines(`${m.id}-prova`, m.activity.lines) },
+      conclusion: toLines(`${m.id}-fine`, m.conclusion),
+      hints: m.hints.map((h) => ({ id: h.id, afterSeconds: h.afterSeconds, withinMeters: h.withinMeters, text: h.text, line: toLine(h.id, h) })),
+      location: p.coord,
+      safeStop: near.point,
+      leg,
+      verifiedOnSite: p.verified,
+    };
   });
 
-export const prologue = raw.prologue;
-export const finale = raw.finale;
+export const prologue = { title: raw.prologue.title, lines: toLines("prologo", raw.prologue.lines) };
+export const finale = { title: raw.finale.title, lines: toLines("finale", raw.finale.lines) };
+
+/** Tutte le battute, per lo script che genera gli audio. */
+export const allLines: Line[] = [
+  ...prologue.lines,
+  ...missions.flatMap((m) => [...m.intro, ...m.activity.lines, ...m.conclusion, ...m.hints.map((h) => h.line)]),
+  ...finale.lines,
+];
 export const rewards = raw.rewards;
 export const allVerified = routeVerified && missions.every((m) => m.verifiedOnSite) && start.verified;
 

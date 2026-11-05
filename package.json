@@ -10,7 +10,8 @@
     "copy-worker": "node scripts/copy-maplibre-worker.mjs",
     "predev": "npm run copy-worker",
     "prebuild": "npm run copy-worker",
-    "test": "vitest run"
+    "test": "vitest run",
+    "audio": "node scripts/genera-audio.mjs"
   },
   "dependencies": {
     "idb-keyval": "^6.3.0",

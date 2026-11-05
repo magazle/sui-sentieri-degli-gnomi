@@ -1,0 +1,12 @@
+{
+  "_istruzioni": "Per ogni personaggio incollate il voice_id scelto nella Voice Library di ElevenLabs (filtro lingua: italiano). La regia di ogni voce è in missions.it.json → characters.",
+  "model": "eleven_multilingual_v2",
+  "voices": {
+    "bastiano": { "voiceId": "", "stability": 0.55, "similarity": 0.8, "style": 0.35 },
+    "fagiolina": { "voiceId": "", "stability": 0.4, "similarity": 0.8, "style": 0.55 },
+    "rimario": { "voiceId": "", "stability": 0.5, "similarity": 0.8, "style": 0.5 },
+    "plin": { "voiceId": "", "stability": 0.45, "similarity": 0.8, "style": 0.4 },
+    "sassolino": { "voiceId": "", "stability": 0.35, "similarity": 0.8, "style": 0.65 },
+    "querce": { "voiceId": "", "stability": 0.6, "similarity": 0.8, "style": 0.3 }
+  }
+}

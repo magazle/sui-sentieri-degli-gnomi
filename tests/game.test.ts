@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { missions, route, routeLength, startPoint } from "@/game/content";
+import { allLines, missions, route, routeLength, startPoint } from "@/game/content";
+import { guide } from "@/game/guide";
+import { listLines } from "@/scripts/lines.mjs";
+import story from "@/content/missions.it.json";
 import { distanceMeters, nearestOnLine, type LngLat } from "@/game/geo";
 import { evaluateReading, GEO_CONFIG, initialGeoState } from "@/game/geofencing";
 import { newHintTracker, revealNext, trackDistance, visibleHints } from "@/game/hints";
@@ -113,5 +116,32 @@ describe("motore di gioco", () => {
     }
     expect(s.phase).toBe("finale");
     expect(s.completedMissionIds).toHaveLength(5);
+  });
+});
+
+describe("dialoghi e audio", () => {
+  it("lo script audio e l'app usano gli stessi id di battuta", () => {
+    expect(listLines(story).map((l: { id: string }) => l.id)).toEqual(allLines.map((l) => l.id));
+  });
+  it("gli id delle battute sono unici", () => {
+    expect(new Set(allLines.map((l) => l.id)).size).toBe(allLines.length);
+  });
+});
+
+describe("guida verso la tappa", () => {
+  const m = missions[1];
+  it("sul vialetto punta lungo il percorso e conta i metri rimanenti", () => {
+    const g = guide(m.safeStop, missions[1], route);
+    expect(g.toTrail).toBe(0);
+    expect(g.alongTrail).toBeLessThan(5);
+  });
+  it("fuori dal vialetto porta prima al punto più vicino del tratto in corso", () => {
+    const off = offset(startPoint, 0, -60);
+    const g = guide(off, m, route);
+    expect(g.toTrail).toBeGreaterThan(20);
+    expect(nearestOnLine(g.trailPoint, route).distance).toBeLessThan(1);
+  });
+  it("riconosce chi è lontano dal parco", () => {
+    expect(guide([4.35, 50.85], m, route).farAway).toBe(true);
   });
 });

@@ -1,128 +1,207 @@
 {
-  "version": 1,
+  "version": 2,
   "status": "bozza editoriale, da approvare",
-  "narrator": "Bastiano, lo gnomo custode di Cascina Bastia",
+  "characters": {
+    "bastiano": {
+      "name": "Bastiano",
+      "role": "lo gnomo custode di Cascina Bastia",
+      "voiceDirection": "Uomo anziano, voce calda e bassa, sorridente, ritmo calmo. Un nonno che racconta una storia vicino al camino.",
+      "tts": { "gender": "male", "pitch": 0.85, "rate": 0.88 }
+    },
+    "fagiolina": {
+      "name": "Fagiolina",
+      "role": "la strega gentile del Faggio",
+      "voiceDirection": "Donna giovane, allegra e un po' svampita, risatina facile, mai spaventosa.",
+      "tts": { "gender": "female", "pitch": 1.15, "rate": 0.95 }
+    },
+    "rimario": {
+      "name": "Rimario",
+      "role": "il gufo poeta della Torretta",
+      "voiceDirection": "Uomo, voce profonda e rotonda, solenne ma buffo, scandisce le rime con piacere.",
+      "tts": { "gender": "male", "pitch": 0.7, "rate": 0.8 }
+    },
+    "plin": {
+      "name": "Plin",
+      "role": "l'ondina del laghetto",
+      "voiceDirection": "Bambina o ragazza, voce dolcissima e leggera, quasi sussurrata, con piccole pause come gocce.",
+      "tts": { "gender": "female", "pitch": 1.4, "rate": 0.85 }
+    },
+    "sassolino": {
+      "name": "Sassolino",
+      "role": "il coboldo della caverna",
+      "voiceDirection": "Voce buffa, un po' rauca e veloce, timido che fa il coraggioso, ride sotto i baffi.",
+      "tts": { "gender": "male", "pitch": 1.3, "rate": 1.08 }
+    },
+    "querce": {
+      "name": "Nonna Quercia",
+      "role": "la più vecchia e saggia delle due querce gemelle",
+      "voiceDirection": "Donna anziana, voce calda, lenta e avvolgente, come una ninna nanna.",
+      "tts": { "gender": "female", "pitch": 0.8, "rate": 0.82 }
+    }
+  },
   "prologue": {
     "title": "Il custode del bosco",
-    "text": "Psst! Piccoli esploratori, sono qui! Sono Bastiano, lo gnomo che custodisce questa vecchia cascina. Stanotte è successa una cosa strana: il bosco ha perso cinque piccoli segreti magici. Senza di loro gli alberi non sanno più cantare. Mi aiutate a ritrovarli? Il primo lo custodiscono le streghe gentili, vicino a un grande albero qui dietro. Andiamo, piano piano, con gli occhi aperti!",
-    "audioSrc": "/audio/it/prologo.mp3"
+    "lines": [
+      { "speaker": "bastiano", "text": "Psst! Quaggiù! Ciao, piccoli esploratori. Io sono Bastiano, lo gnomo che custodisce questa vecchia cascina." },
+      { "speaker": "bastiano", "text": "Stanotte è successa una cosa stranissima. Il bosco ha perso cinque segreti magici, e senza di loro gli alberi non riescono più a cantare." },
+      { "speaker": "bastiano", "text": "Io sono piccolo e ho le gambe corte. Mi aiutate voi a ritrovarli? Sì? Che bello!" },
+      { "speaker": "bastiano", "text": "Il primo segreto ce l'ha la mia amica Fagiolina, la strega gentile. Abita in un albero gigante, qui vicino. Andiamo piano piano, con gli occhi bene aperti!" }
+    ]
   },
   "missions": [
     {
       "id": "m1",
       "order": 1,
       "title": "Il Faggio delle Streghe",
-      "character": "Le streghe gentili",
+      "characterId": "fagiolina",
       "rewardId": "foglia",
       "activationRadiusMeters": 35,
       "safeStopDescription": "Fermatevi sul vialetto davanti al grande faggio, senza entrare nell'erba alta.",
-      "introductionText": "Ecco il faggio delle streghe! Le streghe gentili ci vivono da tantissimo tempo. Quando il vento soffia, le sue foglie fanno shhh, shhh. Le streghe ci daranno il primo segreto solo se sappiamo parlare la loro lingua: quella delle foglie.",
-      "introductionAudioSrc": "/audio/it/m1-intro.mp3",
+      "intro": [
+        { "speaker": "fagiolina", "text": "Oh! Chi c'è? Dei bambini! Ciao ciao! Io sono Fagiolina, la strega gentile. Questo grande faggio è casa mia." },
+        { "speaker": "fagiolina", "text": "Il segreto del bosco ce l'ho io. Ma lo regalo solo a chi sa parlare la lingua delle foglie. Volete provare?" }
+      ],
       "activity": {
         "type": "observe",
-        "prompt": "Guardate il grande albero: è il più grosso qui intorno? Adesso diventiamo foglie: alziamo le braccia e facciamo tutti insieme shhh, shhh, come il vento. Più piano... più forte... e di nuovo piano!",
-        "adultNote": "Se vedete cerchi di funghi nel prato, sono i cerchi delle fate: si guardano da lontano, non si calpestano. Se non ci sono, le fate stanno dormendo."
+        "lines": [
+          { "speaker": "fagiolina", "text": "Alzate le braccia, così, come i rami. Adesso facciamo il vento: shhh, shhh. Più piano... più forte... e di nuovo piano piano!" }
+        ],
+        "adultNote": "Se vedete cerchi di funghi nel prato sono i cerchi delle fate: si guardano da lontano e non si calpestano. Se non ci sono, le fate stanno dormendo."
       },
-      "conclusionText": "Bravissimi! Le streghe vi hanno sentito e vi regalano la foglia magica. Torniamo da Bastiano a fargliela vedere: lui sa dove andare dopo.",
+      "conclusion": [
+        { "speaker": "fagiolina", "text": "Che bel vento! Le mie foglie vi hanno sentito. Ecco a voi la foglia magica. Tenetela da conto!" },
+        { "speaker": "bastiano", "text": "Bravissimi! Tornate da me alla cascina: il prossimo segreto è in alto, in una torre." }
+      ],
       "hints": [
-        { "id": "m1-h1", "text": "Bastiano dice: le streghe abitano vicino all'albero più grande. Seguite il vialetto verso il bosco." },
-        { "id": "m1-h2", "afterSeconds": 180, "text": "Cercate un albero enorme con la corteccia liscia e grigia, come la pelle di un elefante." },
-        { "id": "m1-h3", "afterSeconds": 360, "text": "Il faggio è poco più avanti sul vialetto, a destra. Adulti: controllate la X sulla mappa." },
-        { "id": "m1-h4", "withinMeters": 80, "text": "Sento le foglie che sussurrano... siamo vicinissimi!" }
+        { "id": "m1-h1", "speaker": "bastiano", "text": "Fagiolina abita nell'albero più grande di tutti. Seguite il vialetto verso il bosco." },
+        { "id": "m1-h2", "speaker": "bastiano", "afterSeconds": 180, "text": "Cercate un albero enorme, con la corteccia liscia e grigia, come la pelle di un elefante." },
+        { "id": "m1-h3", "speaker": "bastiano", "afterSeconds": 360, "text": "Il faggio è poco più avanti sul vialetto. Grandi: seguite la freccia sulla mappa." },
+        { "id": "m1-h4", "speaker": "fagiolina", "withinMeters": 80, "text": "Ehi! Sento dei passettini... siete voi? Sono qui, sono qui!" }
       ]
     },
     {
       "id": "m2",
       "order": 2,
-      "title": "La Torretta della parola segreta",
-      "character": "Il poeta della torretta",
+      "title": "La Torretta del Gufo Poeta",
+      "characterId": "rimario",
       "rewardId": "parola",
       "activationRadiusMeters": 35,
       "safeStopDescription": "Fermatevi sul vialetto davanti alla torretta.",
-      "introductionText": "Questa è la torretta! Qui abita un vecchio poeta che conosce una parola segreta. Ma la regala solo a chi sa ripetere la sua filastrocca. Ascoltate bene!",
-      "introductionAudioSrc": "/audio/it/m2-intro.mp3",
+      "intro": [
+        { "speaker": "rimario", "text": "Uh-uh! Buongiorno, piccoli viandanti. Io sono Rimario, il gufo poeta. Abito lassù, in cima alla torretta." },
+        { "speaker": "rimario", "text": "Custodisco una parola segreta. La regalo solo a chi sa ripetere la mia filastrocca. Siete pronti? Uh-uh!" }
+      ],
       "activity": {
         "type": "repeat",
-        "prompt": "Ripetete con me, una riga alla volta: «Foglia, foglia, vola via, porta il bosco a casa mia. Gnomo, gnomo, piccolino, dimmi tu il cammino!»",
-        "adultNote": "Ripetete la filastrocca insieme ai bambini una riga alla volta, anche due o tre volte."
+        "lines": [
+          { "speaker": "rimario", "text": "Ripetete con me, una riga alla volta. Foglia, foglia, vola via..." },
+          { "speaker": "rimario", "text": "porta il bosco a casa mia." },
+          { "speaker": "rimario", "text": "Gnomo, gnomo, piccolino..." },
+          { "speaker": "rimario", "text": "dimmi tu qual è il cammino!" }
+        ],
+        "adultNote": "Ripetete la filastrocca con i bambini una riga alla volta, anche due o tre volte."
       },
-      "conclusionText": "Che voce magica! Il poeta vi regala la parola segreta: CAMMINO. Tenetela a mente, servirà alla fine.",
+      "conclusion": [
+        { "speaker": "rimario", "text": "Magnifico! Che voci da poeti! La parola segreta è... CAMMINO. Ricordatevela bene, vi servirà alla fine." },
+        { "speaker": "bastiano", "text": "Cammino! Che bella parola. Ora scendiamo verso l'acqua: lì vive una creatura timidissima." }
+      ],
       "hints": [
-        { "id": "m2-h1", "text": "Bastiano dice: il poeta vive in alto, in una piccola torre di mattoni. Ripassate davanti alla cascina e proseguite." },
-        { "id": "m2-h2", "afterSeconds": 180, "text": "Cercate una torre piccola e rotonda, più alta degli alberi bassi." },
-        { "id": "m2-h3", "afterSeconds": 360, "text": "La Torretta Viscontea è sul vialetto verso destra dopo la cascina. Adulti: seguite la linea gialla." },
-        { "id": "m2-h4", "withinMeters": 80, "text": "Alzate gli occhi: vedete la torretta?" }
+        { "id": "m2-h1", "speaker": "bastiano", "text": "Rimario abita in una piccola torre di mattoni. Ripassate davanti alla mia cascina e proseguite." },
+        { "id": "m2-h2", "speaker": "bastiano", "afterSeconds": 180, "text": "Cercate una torre piccola e rotonda, più alta degli alberi bassi." },
+        { "id": "m2-h3", "speaker": "bastiano", "afterSeconds": 360, "text": "La torretta è dopo la cascina, verso destra. Grandi: seguite la freccia sulla mappa." },
+        { "id": "m2-h4", "speaker": "rimario", "withinMeters": 80, "text": "Uh-uh! Vi vedo da quassù! Alzate gli occhi!" }
       ]
     },
     {
       "id": "m3",
       "order": 3,
-      "title": "Il Laghetto delle Ondine",
-      "character": "Le ondine",
+      "title": "Il Laghetto dell'Ondina",
+      "characterId": "plin",
       "rewardId": "goccia",
       "activationRadiusMeters": 35,
       "safeStopDescription": "Fermatevi sul vialetto, dalla parte esterna della recinzione del laghetto.",
-      "introductionText": "Sentite? È l'acqua del laghetto. Qui vivono le ondine, piccole fate d'acqua che non si fanno mai vedere. Si fanno solo sentire. Restiamo qui sul vialetto, in silenzio, e ascoltiamo.",
-      "introductionAudioSrc": "/audio/it/m3-intro.mp3",
+      "intro": [
+        { "speaker": "plin", "text": "Ciao... piano piano, per favore. Io sono Plin, l'ondina del laghetto. Sono piccola come una goccia." },
+        { "speaker": "plin", "text": "Mi faccio vedere solo da chi sa ascoltare. Restate lì sul vialetto e fate silenzio. Sentite l'acqua?" }
+      ],
       "activity": {
         "type": "choice",
-        "prompt": "Le ondine fanno un suono. Quale sarà? Il clic-clac del sasso, il plin-plon della goccia o il bum-bum del tamburo?",
-        "options": ["Clic-clac", "Plin-plon", "Bum-bum"],
+        "lines": [
+          { "speaker": "plin", "text": "Indovinate qual è la mia canzone. È il clic clac del sasso, il plin plon della goccia, o il bum bum del tamburo?" }
+        ],
+        "options": ["Clic clac", "Plin plon", "Bum bum"],
         "correctOption": 1,
-        "adultNote": "Restate sul vialetto, fuori dalla recinzione. Qualunque risposta va bene: poi si sceglie insieme il plin-plon."
+        "adultNote": "Restate sul vialetto, fuori dalla recinzione. Ogni risposta va bene: poi si sceglie insieme il plin plon."
       },
-      "conclusionText": "Plin-plon! Le ondine sono felici e vi regalano una goccia luminosa.",
+      "conclusion": [
+        { "speaker": "plin", "text": "Plin plon! Sì, è la mia canzone! Vi regalo una goccia luminosa. Brilla anche al buio." },
+        { "speaker": "bastiano", "text": "Una goccia che brilla! Adesso ci vuole coraggio: andiamo dai coboldi della caverna." }
+      ],
       "hints": [
-        { "id": "m3-h1", "text": "Bastiano dice: le ondine abitano dove c'è l'acqua. Seguite il vialetto che scende." },
-        { "id": "m3-h2", "afterSeconds": 180, "text": "Cercate un tempietto bianco con le colonne, vicino all'acqua." },
-        { "id": "m3-h3", "afterSeconds": 360, "text": "Il laghetto è a sinistra del vialetto. Adulti: fermatevi sul percorso, non avvicinatevi alla riva." },
-        { "id": "m3-h4", "withinMeters": 80, "text": "Sento l'acqua... le ondine sono qui vicino!" }
+        { "id": "m3-h1", "speaker": "bastiano", "text": "Plin abita dove c'è l'acqua. Seguite il vialetto che scende." },
+        { "id": "m3-h2", "speaker": "bastiano", "afterSeconds": 180, "text": "Cercate un tempietto bianco con le colonne, vicino all'acqua." },
+        { "id": "m3-h3", "speaker": "bastiano", "afterSeconds": 360, "text": "Il laghetto è vicino al vialetto. Grandi: fermatevi sul percorso, fuori dalla recinzione." },
+        { "id": "m3-h4", "speaker": "plin", "withinMeters": 80, "text": "Plin... plon... sono qui vicino... sentite?" }
       ]
     },
     {
       "id": "m4",
       "order": 4,
-      "title": "La Caverna dei Coboldi",
-      "character": "I coboldi",
+      "title": "La Caverna del Coboldo",
+      "characterId": "sassolino",
       "rewardId": "pietra",
       "activationRadiusMeters": 35,
       "safeStopDescription": "Fermatevi sul vialetto vicino alla caverna, senza entrare e senza salire sulle rocce.",
-      "introductionText": "Questa è la caverna dei coboldi! I coboldi sono piccoli e timidi, e un po' dispettosi. Hanno nascosto il loro segreto e lo sorvegliano con tre pietre magiche. Chi è abbastanza coraggioso da trovarle... solo con gli occhi?",
-      "introductionAudioSrc": "/audio/it/m4-intro.mp3",
+      "intro": [
+        { "speaker": "sassolino", "text": "Ehi! Chi va là? Ah, siete bambini. Meno male! Io sono Sassolino, il coboldo. Sono piccolo, ma coraggiosissimo!" },
+        { "speaker": "sassolino", "text": "Ho nascosto il segreto dietro tre pietre magiche. Chi le trova... solo con gli occhi, senza toccare... vince!" }
+      ],
       "activity": {
         "type": "observe",
-        "prompt": "Contiamo insieme con il dito: una pietra... due pietre... tre pietre! Non si toccano e non si spostano: i coboldi ci guardano!",
-        "adultNote": "Aiutate i bambini a individuare tre pietre dal vialetto. Nessuno entra nella caverna e nessuno sale sulle rocce."
+        "lines": [
+          { "speaker": "sassolino", "text": "Contiamo insieme col dito. Una pietra... due pietre... tre pietre! Shhh, non si toccano: sono magiche!" }
+        ],
+        "adultNote": "Aiutate i bambini a trovare tre pietre guardando dal vialetto. Nessuno entra nella caverna e nessuno sale sulle rocce."
       },
-      "conclusionText": "Che coraggio! I coboldi escono un attimo a salutarvi e vi regalano una pietra magica. Manca solo l'ultimo segreto!",
+      "conclusion": [
+        { "speaker": "sassolino", "text": "Tre! Le avete trovate tutte! Siete più coraggiosi di me. Ecco la pietra dei coboldi, eh eh!" },
+        { "speaker": "bastiano", "text": "Che coraggio! Manca solo l'ultimo segreto. Lo custodiscono due alberi vecchissimi." }
+      ],
       "hints": [
-        { "id": "m4-h1", "text": "Bastiano dice: i coboldi vivono sotto terra, in un posto fatto di rocce. Seguite il vialetto." },
-        { "id": "m4-h2", "afterSeconds": 180, "text": "Cercate un mucchio di grandi rocce, con un buco scuro come una porta." },
-        { "id": "m4-h3", "afterSeconds": 360, "text": "La caverna è su un piccolo giro a destra del vialetto principale. Adulti: controllate la X sulla mappa." },
-        { "id": "m4-h4", "withinMeters": 80, "text": "Shhh... i coboldi sono qui vicino. Camminiamo in punta di piedi!" }
+        { "id": "m4-h1", "speaker": "bastiano", "text": "Sassolino vive tra le rocce, in una caverna. Seguite il vialetto." },
+        { "id": "m4-h2", "speaker": "bastiano", "afterSeconds": 180, "text": "Cercate un mucchio di grandi rocce, con un buco scuro come una porta." },
+        { "id": "m4-h3", "speaker": "bastiano", "afterSeconds": 360, "text": "La caverna è su un piccolo giro del vialetto. Grandi: seguite la freccia sulla mappa." },
+        { "id": "m4-h4", "speaker": "sassolino", "withinMeters": 80, "text": "Shhh! Vi sento arrivare... in punta di piedi, eh!" }
       ]
     },
     {
       "id": "m5",
       "order": 5,
       "title": "Le due Querce",
-      "character": "Le querce gemelle",
+      "characterId": "querce",
       "rewardId": "ghianda",
       "activationRadiusMeters": 35,
       "safeStopDescription": "Fermatevi sul vialetto davanti alle due querce.",
-      "introductionText": "Eccole, le due querce gemelle! Sono le più vecchie e sagge del bosco. Hanno l'ultimo segreto, ma prima vogliono sentire la formula magica, con tutti i segreti che avete raccolto.",
-      "introductionAudioSrc": "/audio/it/m5-intro.mp3",
+      "intro": [
+        { "speaker": "querce", "text": "Benvenuti, piccoli. Io sono Nonna Quercia, e qui accanto c'è mio fratello gemello. Siamo gli alberi più vecchi del bosco." },
+        { "speaker": "querce", "text": "Abbiamo l'ultimo segreto. Ma prima vogliamo sentire la formula magica, con tutti i segreti che avete raccolto." }
+      ],
       "activity": {
         "type": "repeat",
-        "prompt": "Prendiamoci per mano e ripetiamo forte: «Foglia, goccia, pietra e CAMMINO: bosco, bosco, torna vicino!»",
-        "adultNote": "La parola CAMMINO è quella della torretta: aiutate i bambini a ricordarla."
+        "lines": [
+          { "speaker": "querce", "text": "Prendetevi per mano e ripetete forte forte: Foglia, goccia, pietra e cammino..." },
+          { "speaker": "querce", "text": "bosco, bosco, torna vicino!" }
+        ],
+        "adultNote": "CAMMINO è la parola segreta della torretta: aiutate i bambini a ricordarla."
       },
-      "conclusionText": "Le querce hanno sentito! Il bosco ricomincia a cantare. Ecco l'ultimo segreto: la ghianda d'oro.",
+      "conclusion": [
+        { "speaker": "querce", "text": "Lo sentite? Il bosco ha ricominciato a cantare. Grazie, piccoli. Ecco l'ultimo segreto: la ghianda d'oro." }
+      ],
       "hints": [
-        { "id": "m5-h1", "text": "Bastiano dice: l'ultimo segreto è tra due alberi grandi grandi, uno accanto all'altro." },
-        { "id": "m5-h2", "afterSeconds": 180, "text": "Cercate due querce gemelle vicino ai giardini aperti." },
-        { "id": "m5-h3", "afterSeconds": 360, "text": "Le querce sono alla fine del vialetto verso i giardini. Adulti: seguite la linea gialla fino in fondo." },
-        { "id": "m5-h4", "withinMeters": 80, "text": "Le vedete? Due alberi gemelli, proprio lì!" }
+        { "id": "m5-h1", "speaker": "bastiano", "text": "L'ultimo segreto è tra due alberi grandi grandi, uno accanto all'altro." },
+        { "id": "m5-h2", "speaker": "bastiano", "afterSeconds": 180, "text": "Cercate due querce gemelle, vicino ai giardini aperti." },
+        { "id": "m5-h3", "speaker": "bastiano", "afterSeconds": 360, "text": "Le querce sono alla fine del vialetto. Grandi: seguite la freccia fino in fondo." },
+        { "id": "m5-h4", "speaker": "querce", "withinMeters": 80, "text": "Venite, venite... siamo qui, una accanto all'altra." }
       ]
     }
   ],
@@ -135,7 +214,9 @@
   },
   "finale": {
     "title": "Custodi del bosco!",
-    "text": "Ce l'avete fatta! Avete ritrovato tutti e cinque i segreti e il bosco canta di nuovo. Da oggi siete ufficialmente custodi del bosco. Bastiano vi aspetta alla cascina per festeggiare: tornate a trovarlo quando volete!",
-    "audioSrc": "/audio/it/finale.mp3"
+    "lines": [
+      { "speaker": "bastiano", "text": "Ce l'avete fatta! Tutti e cinque i segreti! Sentite come canta il bosco?" },
+      { "speaker": "bastiano", "text": "Da oggi siete custodi del bosco, proprio come me. Tornate a trovarmi alla cascina quando volete. Ciao ciao, piccoli amici!" }
+    ]
   }
 }

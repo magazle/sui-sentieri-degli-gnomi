@@ -4,12 +4,15 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { allVerified, finale, missions, prologue, rewards, route, routeLength } from "@/game/content";
 import { reducer } from "@/game/engine";
-import type { LngLat } from "@/game/geo";
 import { evaluateReading, GEO_CONFIG, initialGeoState, type GeoState } from "@/game/geofencing";
 import { visibleHints } from "@/game/hints";
 import { clearProgress, loadProgress, newProgress, saveProgress, type GameProgress } from "@/game/progress";
 import { useGeolocation, useWakeLock } from "@/hooks/useGeolocation";
-import { Narration } from "./audio/Narration";
+import { guide } from "@/game/guide";
+import { useCompass } from "@/hooks/useCompass";
+import { Dialogue } from "./audio/Dialogue";
+import { unlockAudio } from "./audio/voice";
+import { CharacterArt } from "./characters/CharacterArt";
 
 const MapView = dynamic(() => import("./map/MapView").then((m) => m.MapView), {
   ssr: false,
@@ -62,7 +65,6 @@ export function Adventure() {
   // Valutazione GPS
   const [geo, setGeo] = useState<GeoState>(initialGeoState);
   const [geoInfo, setGeoInfo] = useState<{ distance?: number; reliable: boolean; arrived: boolean }>({ reliable: false, arrived: false });
-  const [lastOnRoute, setLastOnRoute] = useState<LngLat | null>(null);
   const announced = useRef<string | null>(null);
 
   useEffect(() => {
@@ -77,7 +79,6 @@ export function Adventure() {
     setGeoInfo({ distance: ev.reliable ? ev.distanceToTarget : geoInfo.distance, reliable: ev.reliable, arrived: ev.arrived });
     if (ev.reliable) {
       dispatch({ type: "distance", meters: ev.distanceToTarget, now: Date.now() });
-      if (ev.distanceToRoute <= GEO_CONFIG.backOnRouteMeters) setLastOnRoute(ev.rejoinPoint);
     }
     if (ev.arrived && announced.current !== current.id) {
       announced.current = current.id;
@@ -103,9 +104,21 @@ export function Adventure() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, state.hints, geoInfo, geo.offRoute, tick]);
 
+  // Guida verso la tappa lungo i vialetti
+  const guidance = useMemo(
+    () => (reading && current && state.phase === "travel" && state.locationMode === "gps" ? guide(reading.position, current, route) : null),
+    [reading, current, state.phase, state.locationMode],
+  );
+  const compass = useCompass();
+  const [focus, setFocus] = useState(0);
+  const guideMe = async () => {
+    unlockAudio();
+    if (!compass.enabled) await compass.enable();
+    setFocus((n) => n + 1);
+  };
+
   const [sheet, setSheet] = useState<null | "help" | "collection">(null);
   const [paused, setPaused] = useState(false);
-  const [recenter, setRecenter] = useState(0);
   const [choice, setChoice] = useState<number | null>(null);
   useEffect(() => setChoice(null), [state.currentIndex, state.missionStep]);
 
@@ -115,12 +128,18 @@ export function Adventure() {
   if (state.phase === "welcome") {
     return (
       <main className="screen center welcome">
-        <div className="hero" aria-hidden>🍄🧙‍♀️🌳</div>
+        <CharacterArt id="bastiano" size={170} />
         <h1>Sui sentieri degli Gnomi</h1>
         <p className="lead">Una caccia al tesoro nel Parco di Monza per piccoli esploratori dai 3 ai 5 anni.</p>
         {saved && saved.phase !== "finale" ? (
           <>
-            <button className="btn btn-big" onClick={() => dispatch({ type: "load", progress: saved })}>
+            <button
+              className="btn btn-big"
+              onClick={() => {
+                unlockAudio();
+                dispatch({ type: "load", progress: saved });
+              }}
+            >
               Riprendi l&apos;avventura
             </button>
             <p className="muted">
@@ -129,6 +148,7 @@ export function Adventure() {
             <button
               className="btn btn-ghost"
               onClick={async () => {
+                unlockAudio();
                 await clearProgress();
                 setSaved(null);
                 dispatch({ type: "goto", phase: "prepare" });
@@ -138,7 +158,13 @@ export function Adventure() {
             </button>
           </>
         ) : (
-          <button className="btn btn-big" onClick={() => dispatch({ type: "goto", phase: "prepare" })}>
+          <button
+            className="btn btn-big"
+            onClick={() => {
+              unlockAudio();
+              dispatch({ type: "goto", phase: "prepare" });
+            }}
+          >
             Inizia l&apos;avventura
           </button>
         )}
@@ -221,13 +247,18 @@ export function Adventure() {
   if (state.phase === "prologue") {
     return (
       <main className="screen">
-        <div className="character" aria-hidden>🍄</div>
         <p className="eyebrow">Cascina Bastia</p>
         <h2>{prologue.title}</h2>
-        <Narration text={prologue.text} audioSrc={prologue.audioSrc} enabled={state.audioEnabled} />
+        <Dialogue lines={prologue.lines} voice={state.audioEnabled} />
         {state.locationMode === "gps" && <GpsStatus status={status} />}
         <div className="actions">
-          <button className="btn btn-big" onClick={() => dispatch({ type: "startJourney", now: Date.now() })}>
+          <button
+            className="btn btn-big"
+            onClick={() => {
+              unlockAudio();
+              dispatch({ type: "startJourney", now: Date.now() });
+            }}
+          >
             Partiamo!
           </button>
         </div>
@@ -241,14 +272,14 @@ export function Adventure() {
     return (
       <main className="screen">
         <p className="eyebrow">
-          Missione {current.order} di {missions.length} · {current.character}
+          Missione {current.order} di {missions.length}
         </p>
         <h2>{current.title}</h2>
 
         {state.missionStep === "intro" && (
           <>
             <div className="banner banner-safe">🛑 {current.safeStopDescription}</div>
-            <Narration text={current.introductionText} audioSrc={current.introductionAudioSrc} enabled={state.audioEnabled} />
+            <Dialogue lines={current.intro} voice={state.audioEnabled} />
             <div className="actions">
               <button className="btn btn-big" onClick={() => dispatch({ type: "missionNext" })}>
                 Facciamo la prova
@@ -262,7 +293,7 @@ export function Adventure() {
 
         {state.missionStep === "activity" && (
           <>
-            <Narration text={current.activity.prompt} enabled={state.audioEnabled} />
+            <Dialogue lines={current.activity.lines} voice={state.audioEnabled} />
             {current.activity.type === "choice" && current.activity.options && (
               <div className="choices">
                 {current.activity.options.map((o, i) => (
@@ -294,7 +325,7 @@ export function Adventure() {
           <>
             <div className="reward" aria-hidden>{reward.emoji}</div>
             <p className="reward-name">{reward.name}</p>
-            <Narration text={current.conclusionText} enabled={state.audioEnabled} />
+            <Dialogue lines={current.conclusion} voice={state.audioEnabled} size="small" />
             <div className="actions">
               <button className="btn btn-big" onClick={() => dispatch({ type: "completeMission", now: Date.now() })}>
                 {state.currentIndex + 1 < missions.length ? "Verso la prossima tappa" : "Al gran finale!"}
@@ -316,7 +347,7 @@ export function Adventure() {
           ))}
         </div>
         <h1>{finale.title}</h1>
-        <Narration text={finale.text} audioSrc={finale.audioSrc} enabled={state.audioEnabled} />
+        <Dialogue lines={finale.lines} voice={state.audioEnabled} />
         <section className="diploma" aria-label="Diploma">
           <p className="eyebrow">Diploma</p>
           <p className="diploma-title">Custode del bosco</p>
@@ -343,7 +374,7 @@ export function Adventure() {
   /* ---------- Mappa / cammino ---------- */
   if (!current) return null;
   const latestHint = hints[hints.length - 1];
-  const showRejoin = geo.offRoute ? lastOnRoute : null;
+  const farAway = guidance?.farAway ?? false;
 
   return (
     <main className="travel">
@@ -355,9 +386,7 @@ export function Adventure() {
           <h2 className="travel-title">{current.title}</h2>
         </div>
         <div className="head-meta">
-          {state.locationMode === "gps" && geoInfo.distance !== undefined && !geo.offRoute && (
-            <span className="pill">~{fmtMeters(geoInfo.distance)}</span>
-          )}
+          {guidance && !farAway && <span className="pill">~{fmtMeters(guidance.toTrail + guidance.alongTrail)}</span>}
           {state.locationMode === "gps" && reading && (
             <span className={`pill ${reading.accuracy <= GEO_CONFIG.maxAccuracyMeters ? "pill-ok" : "pill-warn"}`}>
               GPS ±{Math.round(reading.accuracy)} m
@@ -371,18 +400,24 @@ export function Adventure() {
         current={current}
         completedIds={state.completedMissionIds}
         reading={state.locationMode === "gps" ? reading : null}
-        rejoinPoint={showRejoin}
-        recenterKey={recenter}
+        guidance={guidance}
+        heading={compass.enabled ? compass.heading : null}
+        focusKey={focus}
       />
 
       <section className="travel-panel">
         {!current.verifiedOnSite && <div className="banner banner-warn small">Tappa da verificare sul posto.</div>}
         {state.locationMode === "gps" && <GpsStatus status={status} onManual={() => dispatch({ type: "setLocationMode", mode: "manual" })} />}
 
-        {geo.offRoute ? (
+        {farAway ? (
+          <div className="banner banner-warn">
+            Siete lontani dal parco: la mappa mostra il percorso. Le indicazioni partono quando arrivate a Cascina Bastia.
+          </div>
+        ) : geo.offRoute && guidance ? (
           <div className="banner banner-alert" role="alert">
-            <strong>Siete usciti dal percorso.</strong> Tornate indietro fino al punto ↩ sulla mappa, l&apos;ultimo punto
-            del vialetto in cui eravate. Non tagliate per i prati.
+            <strong>Siete usciti dal percorso.</strong> Seguite la freccia blu: {fmtMeters(guidance.toTrail)} fino al vialetto
+            (pallino bianco), poi la linea gialla.
+            <button className="link" onClick={guideMe}>Guidami</button>
           </div>
         ) : geoInfo.arrived ? (
           <div className="banner banner-arrive" role="status">
@@ -390,7 +425,7 @@ export function Adventure() {
           </div>
         ) : latestHint ? (
           <div className="hint">
-            <Narration key={latestHint.id} text={latestHint.text} audioSrc={latestHint.audioSrc} enabled={state.audioEnabled} />
+            <Dialogue key={latestHint.id} lines={[latestHint.line]} voice={state.audioEnabled} size="small" />
           </div>
         ) : null}
 
@@ -409,7 +444,9 @@ export function Adventure() {
         <nav className="toolbar" aria-label="Strumenti">
           <button className="tool" onClick={() => setSheet("help")}>❓<span>Aiuto</span></button>
           <button className="tool" onClick={() => setSheet("collection")}>🎒<span>Segreti</span></button>
-          <button className="tool" onClick={() => setRecenter((n) => n + 1)}>🎯<span>Centra</span></button>
+          <button className={`tool ${compass.enabled ? "tool-on" : ""}`} onClick={() => (compass.enabled && focus ? compass.disable() : guideMe())}>
+            🧭<span>{compass.enabled ? "Bussola on" : "Guidami"}</span>
+          </button>
           <button className="tool" onClick={() => dispatch({ type: "toggleAudio" })}>
             {state.audioEnabled ? "🔊" : "🔇"}
             <span>Voce</span>
@@ -421,7 +458,7 @@ export function Adventure() {
       {sheet === "help" && (
         <Sheet title="Dove devo andare?" onClose={() => setSheet(null)}>
           <p>
-            <strong>Prossima tappa:</strong> {current.title}. Seguite la linea gialla fino alla ✕.
+            <strong>Prossima tappa:</strong> {current.title}. Seguite la freccia blu e la linea gialla con le frecce fino alla ✕ rossa.
           </p>
           <ul className="facts">
             {hints.map((h) => (
@@ -429,8 +466,8 @@ export function Adventure() {
             ))}
           </ul>
           <p className="small">
-            <strong>Se vi siete persi:</strong> tornate all&apos;ultimo vialetto che riconoscete e seguite la linea gialla.
-            Non tagliate per i prati.
+            <strong>Se vi siete persi:</strong> premete «Guidami». La mappa si gira come il telefono e la freccia blu
+            indica dove andare: prima al vialetto più vicino, poi lungo la linea gialla.
           </p>
           <div className="actions">
             <button className="btn btn-soft" onClick={() => dispatch({ type: "revealHint" })}>
@@ -439,11 +476,11 @@ export function Adventure() {
             <button
               className="btn btn-ghost"
               onClick={() => {
-                setRecenter((n) => n + 1);
+                guideMe();
                 setSheet(null);
               }}
             >
-              Ricentra la mappa
+              Guidami
             </button>
           </div>
         </Sheet>

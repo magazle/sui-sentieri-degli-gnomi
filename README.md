@@ -42,6 +42,14 @@ tests/     test della logica di gioco
 
 Contenuti, coordinate, regole e UI sono separati: per cambiare un testo si tocca solo `content/missions.it.json`, per spostare una tappa solo `content/route.geo.json`.
 
+## Guida sulla mappa
+
+- ✕ rossa con il nome: la prossima tappa. Numeri grigi: le tappe successive. Emoji: tappe completate.
+- Linea gialla con frecce: il tratto di vialetto ancora da fare.
+- Freccia blu sulla vostra posizione: la direzione da seguire. Fuori dal vialetto, la linea blu tratteggiata porta al punto più vicino del vialetto (pallino bianco).
+- «Guidami»: attiva la bussola, la mappa ruota come il telefono e inquadra posizione e prossimi metri.
+- Se siete lontani dal parco, la mappa mostra solo il percorso.
+
 ## Regole di gioco (configurabili)
 
 Soglie in `game/geofencing.ts` e `game/hints.ts`, da calibrare sul campo:
@@ -54,7 +62,7 @@ Soglie in `game/geofencing.ts` e `game/hints.ts`, da calibrare sul campo:
 
 - [ ] **Sopralluogo**: verificare tappe, punti di sosta e raggi, poi mettere `verifiedOnSite: true` (vedi `docs/field-survey.md`).
 - [ ] **Testi**: le missioni sono bozze editoriali da approvare.
-- [ ] **Audio**: mancano i file in `public/audio/it/`. Finché non ci sono, l'app usa la voce sintetica del telefono (etichetta «voce provvisoria»).
-- [ ] **Illustrazioni**: per ora emoji al posto di personaggi e ricompense.
+- [ ] **Voci**: mancano gli audio in `public/audio/it/`; finché non ci sono, l'app usa la voce sintetica del telefono con un timbro diverso per personaggio. Come generarle o registrarle: `docs/voci.md`.
+- [x] **Personaggi**: Bastiano, Fagiolina, Rimario, Plin, Sassolino e Nonna Quercia, illustrati e animati. Galleria con prova voce su `/personaggi`.
 - [ ] **Mappe offline**: vedi `docs/mappe.md`.
 - [ ] Privacy notice prima della pubblicazione.
