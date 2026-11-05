@@ -1,6 +1,6 @@
 // Service worker minimo: guscio dell'app in cache, tile della mappa
 // in cache man mano che vengono viste (stale-while-revalidate).
-const APP = "gnomi-app-v1";
+const APP = "gnomi-app-v2";
 const TILES = "gnomi-tiles-v1";
 const SHELL = ["/", "/manifest.webmanifest", "/icons/icon.svg"];
 

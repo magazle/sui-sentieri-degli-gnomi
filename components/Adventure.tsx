@@ -198,7 +198,13 @@ export function Adventure() {
           La navigazione è indicativa e non sostituisce l&apos;attenzione dell&apos;adulto accompagnatore.
         </p>
         <div className="actions">
-          <button className="btn btn-big" onClick={() => dispatch({ type: "goto", phase: "permission" })}>
+          <button
+            className="btn btn-big"
+            onClick={() => {
+              unlockAudio();
+              dispatch({ type: "goto", phase: "permission" });
+            }}
+          >
             Abbiamo capito
           </button>
         </div>
@@ -223,6 +229,7 @@ export function Adventure() {
           <button
             className="btn btn-big"
             onClick={() => {
+              unlockAudio();
               dispatch({ type: "setLocationMode", mode: "gps" });
               dispatch({ type: "goto", phase: "prologue" });
             }}
@@ -232,6 +239,7 @@ export function Adventure() {
           <button
             className="btn btn-ghost"
             onClick={() => {
+              unlockAudio();
               dispatch({ type: "setLocationMode", mode: "manual" });
               dispatch({ type: "goto", phase: "prologue" });
             }}

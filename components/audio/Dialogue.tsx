@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { characters, type Line } from "@/game/content";
 import { CharacterArt } from "../characters/CharacterArt";
-import { speak, stopAll } from "./voice";
+import { speak, stopAll, unlockAudio } from "./voice";
 
 type Props = {
   lines: Line[];
@@ -22,6 +22,7 @@ export function Dialogue({ lines, voice, autoPlay = true, size = "big", onFinish
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [synthetic, setSynthetic] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false);
   const level = useRef(0);
   const stopRef = useRef<(() => void) | null>(null);
   const runId = useRef(0);
@@ -37,6 +38,7 @@ export function Dialogue({ lines, voice, autoPlay = true, size = "big", onFinish
 
   const playFrom = async (start: number) => {
     stop();
+    setNeedsTap(false);
     const id = ++runId.current;
     setPlaying(true);
     for (let i = start; i < lines.length; i++) {
@@ -46,6 +48,11 @@ export function Dialogue({ lines, voice, autoPlay = true, size = "big", onFinish
       stopRef.current = p.stop;
       const how = await p.done;
       if (runId.current !== id) return;
+      if (how === "blocked") {
+        setNeedsTap(true);
+        setPlaying(false);
+        return;
+      }
       setSynthetic(how === "tts");
       // breve respiro tra una battuta e l'altra
       await new Promise((r) => setTimeout(r, 450));
@@ -84,13 +91,37 @@ export function Dialogue({ lines, voice, autoPlay = true, size = "big", onFinish
               ))}
             </span>
           )}
-          {voice ? (
+          {voice && needsTap ? (
+            <button
+              className="btn btn-big btn-sm"
+              onClick={() => {
+                unlockAudio();
+                playFrom(index);
+              }}
+            >
+              ▶ Tocca per ascoltare {ch.name}
+            </button>
+          ) : voice ? (
             <>
-              <button className="btn btn-soft btn-sm" onClick={() => (playing ? stop() : playFrom(last && !playing ? 0 : index))}>
+              <button
+                className="btn btn-soft btn-sm"
+                onClick={() => {
+                  unlockAudio();
+                  if (playing) stop();
+                  else playFrom(last ? 0 : index);
+                }}
+              >
                 {playing ? "⏸ Pausa" : last ? "↺ Riascolta" : "▶ Ascolta"}
               </button>
               {!last && (
-                <button className="btn btn-ghost btn-sm" onClick={() => playFrom(index + 1)} aria-label="Battuta successiva">
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    unlockAudio();
+                    playFrom(index + 1);
+                  }}
+                  aria-label="Battuta successiva"
+                >
                   Avanti ⏭
                 </button>
               )}

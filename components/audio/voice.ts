@@ -14,6 +14,22 @@ let ctx: AudioContext | null = null;
 let analyser: AnalyserNode | null = null;
 let audioEl: HTMLAudioElement | null = null;
 const missing = new Set<string>();
+let unlocked = false;
+
+/** Mezzo secondo di silenzio (WAV), per sbloccare l'elemento audio dentro un tocco. */
+function silentWav() {
+  const rate = 8000;
+  const n = rate / 2;
+  const buf = new ArrayBuffer(44 + n);
+  const v = new DataView(buf);
+  const w = (o: number, t: string) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVE"); w(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+  w(36, "data"); v.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+  return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+}
 
 /** Va chiamata dentro un tocco dell'utente (sblocca l'audio su iOS). */
 export function unlockAudio() {
@@ -33,6 +49,18 @@ export function unlockAudio() {
       analyser.fftSize = 512;
       src.connect(analyser);
       analyser.connect(ctx.destination);
+    }
+    // iOS sblocca un elemento audio solo se play() parte dentro un tocco:
+    // riproduciamo un attimo di silenzio, poi l'elemento resta utilizzabile.
+    if (!unlocked && audioEl) {
+      // conta la chiamata a play() dentro il tocco, non che finisca
+      unlocked = true;
+      const a = audioEl;
+      a.src = silentWav();
+      a.play().then(
+        () => a.pause(),
+        () => {},
+      );
     }
     // iOS: una frase vuota sblocca anche la sintesi vocale
     if ("speechSynthesis" in window && !speechSynthesis.speaking) {
@@ -102,9 +130,17 @@ function playFile(line: Line, level: { current: number }): Playback | null {
     };
     a.src = line.audioSrc;
     a.currentTime = 0;
-    a.play().then(() => {
-      raf = requestAnimationFrame(meter);
-    }, reject);
+    if (ctx?.state === "suspended") ctx.resume();
+    a.play().then(
+      () => {
+        raf = requestAnimationFrame(meter);
+      },
+      (err: DOMException) => {
+        // Bloccato dal browser (serve un tocco): non è un file mancante.
+        if (err?.name === "NotAllowedError") reject(new Error("blocked"));
+        else if (err?.name !== "AbortError") reject(err);
+      },
+    );
   }).finally(() => {
     cancelAnimationFrame(raf);
     level.current = 0;
@@ -174,16 +210,18 @@ function playTts(line: Line, level: { current: number }): Playback {
 }
 
 /** Dice una battuta: file vero se c'è, altrimenti voce sintetica. */
-export function speak(line: Line, level: { current: number }): { stop: () => void; done: Promise<"file" | "tts"> } {
+export function speak(line: Line, level: { current: number }): { stop: () => void; done: Promise<"file" | "tts" | "blocked"> } {
   let current: Playback | null = playFile(line, level);
   let cancelled = false;
-  const done = (async (): Promise<"file" | "tts"> => {
+  const done = (async (): Promise<"file" | "tts" | "blocked"> => {
     if (current) {
       try {
         await current.done;
         return "file";
-      } catch {
+      } catch (e) {
         if (cancelled) return "file";
+        // C'è la voce vera ma il browser vuole un tocco: niente voce robotica al suo posto.
+        if ((e as Error)?.message === "blocked") return "blocked";
       }
     }
     current = playTts(line, level);
