@@ -172,14 +172,16 @@ p { margin: 0 0 0.75rem; }
 /* Personaggi */
 .character-art { display: block; margin: 0 auto; overflow: visible; }
 .ch-breathe { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 3.6s ease-in-out infinite; }
-.ch-blink { transform-box: fill-box; transform-origin: center; animation: blink 4.8s infinite; }
+.ch-lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: lid 5.2s infinite; }
+.ch-zzz { animation: zzz 3s ease-in-out infinite; }
 .is-talking .ch-bob { animation: bob 0.9s ease-in-out infinite; }
 .ch-bob { transform-box: fill-box; transform-origin: 50% 100%; }
 .ch-bubble { animation: rise 3s ease-in infinite; }
 .ch-bubble-2 { animation-delay: 1.4s; }
 .ch-glow { animation: glow 2.2s ease-in-out infinite; }
 @keyframes breathe { 50% { transform: scale(1.015, 1.03); } }
-@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes lid { 0%, 91%, 100% { transform: scaleY(0); } 94% { transform: scaleY(0.55); } }
+@keyframes zzz { 0% { opacity: 0; transform: translate(0, 0); } 50% { opacity: 0.6; } 100% { opacity: 0; transform: translate(6px, -10px); } }
 @keyframes bob { 50% { transform: translateY(-3px) rotate(-1deg); } }
 @keyframes rise { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(-40px); opacity: 0; } }
 @keyframes glow { 50% { opacity: 0.5; } }
