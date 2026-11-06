@@ -105,8 +105,20 @@ p { margin: 0 0 0.75rem; }
 .collection-row { display: flex; gap: 8px; }
 @keyframes pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.diploma { width: 100%; border: 3px double var(--forest); border-radius: var(--radius); padding: 18px; background: #fffdf7; }
-.diploma-title { font-family: var(--font-title); font-size: 1.8rem; color: var(--mushroom); margin: 4px 0; }
+/* Diploma */
+.dp-editor { width: 100%; display: flex; flex-direction: column; gap: 16px; text-align: left; }
+.dp-preview { width: 100%; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(47, 74, 43, 0.18); }
+.diploma-svg { display: block; width: 100%; height: auto; }
+.dp-form { display: flex; flex-direction: column; gap: 10px; }
+.dp-form h3 { margin: 6px 0 0; }
+.dp-name { display: flex; gap: 6px; align-items: center; }
+.dp-name input {
+  flex: 1; min-height: 52px; border-radius: 16px; border: 2px solid var(--paper-2); background: #fffdf7;
+  padding: 0 16px; font: inherit; font-size: 1.15rem; color: var(--ink);
+}
+.dp-name input:focus { outline: 3px solid var(--sky); outline-offset: 1px; border-color: transparent; }
+.dp-export { position: fixed; left: -10000px; top: 0; width: 1000px; height: 1414px; pointer-events: none; }
+.dp-print { display: none; }
 
 /* ---------- Cammino ---------- */
 .travel { height: 100dvh; display: flex; flex-direction: column; }
@@ -231,8 +243,7 @@ p { margin: 0 0 0.75rem; }
 
 @media print {
   body * { visibility: hidden; }
-  .diploma, .diploma * { visibility: visible; }
-  .diploma { position: absolute; inset: 40px; border-width: 6px; }
+  .dp-print { display: block; visibility: visible; position: absolute; inset: 0; width: 100%; height: auto; }
 }
 
 /* Galleria personaggi */

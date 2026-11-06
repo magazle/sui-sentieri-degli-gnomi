@@ -106,6 +106,7 @@ export function MapView({ current, completedIds, reading, guidance, heading, foc
   const ready = useRef(false);
   const fittedFor = useRef<string | null>(null);
   const redraw = useRef<() => void>(() => {});
+  const drawLiveRef = useRef<() => void>(() => {});
 
   /* ---------- creazione ---------- */
   useEffect(() => {
@@ -199,7 +200,7 @@ export function MapView({ current, completedIds, reading, guidance, heading, foc
     };
     redraw.current = () => {
       draw();
-      drawLive();
+      drawLiveRef.current();
     };
     draw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,7 +258,10 @@ export function MapView({ current, completedIds, reading, guidance, heading, foc
       }
     }
   };
-  useEffect(drawLive); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    drawLiveRef.current = drawLive;
+    drawLive();
+  });
 
   /* ---------- bussola: la mappa ruota come il telefono ---------- */
   useEffect(() => {

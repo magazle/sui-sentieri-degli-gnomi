@@ -13,6 +13,8 @@ import { useCompass } from "@/hooks/useCompass";
 import { Dialogue } from "./audio/Dialogue";
 import { unlockAudio } from "./audio/voice";
 import { CharacterArt } from "./characters/CharacterArt";
+import { DiplomaEditor } from "./diploma/DiplomaEditor";
+import { clearDiploma } from "./diploma/diplomaData";
 
 const MapView = dynamic(() => import("./map/MapView").then((m) => m.MapView), {
   ssr: false,
@@ -131,7 +133,7 @@ export function Adventure() {
         <CharacterArt id="bastiano" size={170} />
         <h1>Sui sentieri degli Gnomi</h1>
         <p className="lead">Una caccia al tesoro nel Parco di Monza per piccoli esploratori dai 3 ai 5 anni.</p>
-        {saved && saved.phase !== "finale" ? (
+        {saved ? (
           <>
             <button
               className="btn btn-big"
@@ -140,21 +142,22 @@ export function Adventure() {
                 dispatch({ type: "load", progress: saved });
               }}
             >
-              Riprendi l&apos;avventura
+              {saved.phase === "finale" ? "Il vostro diploma" : "Riprendi l’avventura"}
             </button>
             <p className="muted">
-              Siete alla tappa {Math.min(saved.currentIndex + 1, 5)} di 5.
+              {saved.phase === "finale" ? "Avete ritrovato tutti e cinque i segreti!" : `Siete alla tappa ${Math.min(saved.currentIndex + 1, 5)} di 5.`}
             </p>
             <button
               className="btn btn-ghost"
               onClick={async () => {
                 unlockAudio();
                 await clearProgress();
+                await clearDiploma();
                 setSaved(null);
                 dispatch({ type: "goto", phase: "prepare" });
               }}
             >
-              Ricomincia da capo
+              {saved.phase === "finale" ? "Nuova avventura" : "Ricomincia da capo"}
             </button>
           </>
         ) : (
@@ -356,25 +359,18 @@ export function Adventure() {
         </div>
         <h1>{finale.title}</h1>
         <Dialogue lines={finale.lines} voice={state.audioEnabled} />
-        <section className="diploma" aria-label="Diploma">
-          <p className="eyebrow">Diploma</p>
-          <p className="diploma-title">Custode del bosco</p>
-          <p className="muted small">Parco di Monza · {new Date().toLocaleDateString("it-IT")}</p>
-        </section>
-        <div className="actions">
-          <button className="btn btn-soft" onClick={() => window.print()}>
-            Stampa il diploma
-          </button>
-          <button
-            className="btn btn-ghost"
-            onClick={async () => {
-              await clearProgress();
-              dispatch({ type: "reset" });
-            }}
-          >
-            Ricomincia
-          </button>
-        </div>
+        <DiplomaEditor />
+        <button
+          className="btn btn-ghost"
+          onClick={async () => {
+            if (!window.confirm("Ricominciare l'avventura? Nomi e foto del diploma verranno cancellati da questo telefono.")) return;
+            await clearProgress();
+            await clearDiploma();
+            dispatch({ type: "reset" });
+          }}
+        >
+          Ricomincia l&apos;avventura
+        </button>
       </main>
     );
   }
