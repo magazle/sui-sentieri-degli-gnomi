@@ -108,7 +108,7 @@ p { margin: 0 0 0.75rem; }
 /* Diploma */
 .dp-editor { width: 100%; display: flex; flex-direction: column; gap: 16px; text-align: left; }
 .dp-preview { width: 100%; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(47, 74, 43, 0.18); }
-.diploma-svg { display: block; width: 100%; height: auto; }
+.diploma-svg { display: block; width: 100%; height: auto; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .dp-form { display: flex; flex-direction: column; gap: 10px; }
 .dp-form h3 { margin: 6px 0 0; }
 .dp-name { display: flex; gap: 6px; align-items: center; }
@@ -119,6 +119,10 @@ p { margin: 0 0 0.75rem; }
 .dp-name input:focus { outline: 3px solid var(--sky); outline-offset: 1px; border-color: transparent; }
 .dp-export { position: fixed; left: -10000px; top: 0; width: 1000px; height: 1414px; pointer-events: none; }
 .dp-print { display: none; }
+.dp-photo-touch { touch-action: none; cursor: grab; }
+.dp-photo-touch:active { cursor: grabbing; }
+.dp-adjust { display: flex; flex-direction: column; gap: 6px; margin-top: -6px; }
+.dp-adjust .btn-sm { min-width: 52px; font-size: 1.2rem; }
 
 /* ---------- Cammino ---------- */
 .travel { height: 100dvh; display: flex; flex-direction: column; }

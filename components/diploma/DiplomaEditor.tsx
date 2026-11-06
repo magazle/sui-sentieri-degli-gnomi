@@ -2,7 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { DiplomaArt, H, PHOTO, W } from "./DiplomaArt";
-import { joinNames, loadDiploma, preparePhoto, saveDiploma, type DiplomaData } from "./diplomaData";
+import {
+  clampCrop,
+  joinNames,
+  loadDiploma,
+  MAX_ZOOM,
+  NO_CROP,
+  placePhoto,
+  preparePhoto,
+  saveDiploma,
+  type Crop,
+  type DiplomaData,
+} from "./diplomaData";
 
 const MAX_NAMES = 6;
 
@@ -20,7 +31,8 @@ function loadImage(src: string) {
  * un canvas. La foto si disegna a parte perché alcuni browser (Safari)
  * bloccano l'esportazione di un SVG che contiene immagini.
  */
-async function renderPng(svg: SVGSVGElement, photo: string | null, scale = 1.6): Promise<Blob> {
+async function renderPng(svg: SVGSVGElement, data: DiplomaData, scale = 1.6): Promise<Blob> {
+  const { photo } = data;
   const clone = svg.cloneNode(true) as SVGSVGElement;
   clone.setAttribute("width", String(W));
   clone.setAttribute("height", String(H));
@@ -36,14 +48,13 @@ async function renderPng(svg: SVGSVGElement, photo: string | null, scale = 1.6):
     g.drawImage(art, 0, 0, W, H);
     if (photo) {
       const img = await loadImage(photo);
-      const side = Math.min(img.naturalWidth, img.naturalHeight);
-      const sx = (img.naturalWidth - side) / 2;
-      const sy = (img.naturalHeight - side) / 2;
+      const size = data.photoSize ?? { w: img.naturalWidth, h: img.naturalHeight };
+      const at = placePhoto(size, data.crop ?? NO_CROP, PHOTO);
       g.save();
       g.beginPath();
       g.arc(PHOTO.cx, PHOTO.cy, PHOTO.r, 0, Math.PI * 2);
       g.clip();
-      g.drawImage(img, sx, sy, side, side, PHOTO.cx - PHOTO.r, PHOTO.cy - PHOTO.r, PHOTO.r * 2, PHOTO.r * 2);
+      g.drawImage(img, at.x, at.y, at.w, at.h);
       g.restore();
       // le foglie della cornice tornano sopra la foto
       g.save();
@@ -78,9 +89,66 @@ export function DiplomaEditor() {
     });
   }, []);
 
+  // salvataggio ritardato: durante i gesti sulla foto i dati cambiano a ogni frame
   useEffect(() => {
-    if (loaded) saveDiploma(data);
+    if (!loaded) return;
+    const t = setTimeout(() => saveDiploma(data), 400);
+    return () => clearTimeout(t);
   }, [data, loaded]);
+
+  /* ---------- gesti sulla foto: un dito sposta, due dita ingrandiscono ---------- */
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const gesture = useRef<{ crop: Crop; x: number; y: number; dist: number; units: number } | null>(null);
+  const [editing, setEditing] = useState(false);
+
+  const setCrop = (c: Crop) =>
+    setData((d) => (d.photoSize ? { ...d, crop: clampCrop(d.photoSize, c, PHOTO.r) } : d));
+
+  const startGesture = (el: Element) => {
+    const pts = [...pointers.current.values()];
+    const rect = (el as SVGElement).ownerSVGElement!.getBoundingClientRect();
+    const mid = pts.reduce((a, p) => ({ x: a.x + p.x / pts.length, y: a.y + p.y / pts.length }), { x: 0, y: 0 });
+    const dist = pts.length > 1 ? Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) : 0;
+    gesture.current = { crop: data.crop ?? NO_CROP, x: mid.x, y: mid.y, dist, units: W / rect.width };
+  };
+
+  const photoHandlers: React.DOMAttributes<SVGCircleElement> = {
+    onPointerDown: (e) => {
+      (e.currentTarget as Element).setPointerCapture(e.pointerId);
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      setEditing(true);
+      startGesture(e.currentTarget);
+    },
+    onPointerMove: (e) => {
+      if (!pointers.current.has(e.pointerId) || !gesture.current) return;
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const pts = [...pointers.current.values()];
+      const g = gesture.current;
+      const mid = pts.reduce((a, p) => ({ x: a.x + p.x / pts.length, y: a.y + p.y / pts.length }), { x: 0, y: 0 });
+      const k = pts.length > 1 && g.dist > 0 ? Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) / g.dist : 1;
+      setCrop({
+        zoom: g.crop.zoom * k,
+        dx: g.crop.dx * k + (mid.x - g.x) * g.units,
+        dy: g.crop.dy * k + (mid.y - g.y) * g.units,
+      });
+    },
+    onPointerUp: (e) => {
+      pointers.current.delete(e.pointerId);
+      if (pointers.current.size) startGesture(e.currentTarget);
+      else {
+        gesture.current = null;
+        setEditing(false);
+      }
+    },
+    onPointerCancel: (e) => {
+      pointers.current.delete(e.pointerId);
+      if (!pointers.current.size) {
+        gesture.current = null;
+        setEditing(false);
+      }
+    },
+  };
+  const zoomBy = (f: number) => setCrop({ ...(data.crop ?? NO_CROP), zoom: (data.crop ?? NO_CROP).zoom * f });
 
   const setName = (i: number, v: string) => setData((d) => ({ ...d, names: d.names.map((n, j) => (j === i ? v : n)) }));
   const addName = () => setData((d) => (d.names.length < MAX_NAMES ? { ...d, names: [...d.names, ""] } : d));
@@ -93,8 +161,8 @@ export function DiplomaEditor() {
     setBusy("photo");
     setError(null);
     try {
-      const photo = await preparePhoto(file);
-      setData((d) => ({ ...d, photo }));
+      const { photo, photoSize } = await preparePhoto(file);
+      setData((d) => ({ ...d, photo, photoSize, crop: NO_CROP }));
     } catch {
       setError("Non sono riuscito ad aprire la foto. Provate a scattarne un'altra.");
     } finally {
@@ -112,7 +180,7 @@ export function DiplomaEditor() {
     setBusy("save");
     setError(null);
     try {
-      const blob = await renderPng(exportRef.current, data.photo);
+      const blob = await renderPng(exportRef.current, data);
       const file = new File([blob], fileName(), { type: "image/png" });
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
       if (nav.canShare?.({ files: [file] })) {
@@ -139,7 +207,7 @@ export function DiplomaEditor() {
     if (!exportRef.current) return;
     setBusy("print");
     try {
-      const blob = await renderPng(exportRef.current, data.photo, 2);
+      const blob = await renderPng(exportRef.current, data, 2);
       const src = URL.createObjectURL(blob);
       setPrintSrc(src);
       await loadImage(src);
@@ -154,8 +222,32 @@ export function DiplomaEditor() {
   return (
     <section className="dp-editor" aria-label="Il vostro diploma">
       <div className="dp-preview">
-        <DiplomaArt names={data.names} photo={data.photo} date={date} />
+        <DiplomaArt
+          names={data.names}
+          photo={data.photo}
+          photoSize={data.photoSize}
+          crop={data.crop}
+          date={date}
+          photoHandlers={data.photoSize ? photoHandlers : undefined}
+          editing={editing}
+        />
       </div>
+      {data.photo && data.photoSize && (
+        <div className="dp-adjust">
+          <p className="small muted">Trascinate la foto con un dito, allargate due dita per ingrandirla.</p>
+          <div className="row">
+            <button className="btn btn-soft btn-sm" onClick={() => zoomBy(1 / 1.15)} disabled={(data.crop?.zoom ?? 1) <= 1} aria-label="Rimpicciolisci la foto">
+              −
+            </button>
+            <button className="btn btn-soft btn-sm" onClick={() => zoomBy(1.15)} disabled={(data.crop?.zoom ?? 1) >= MAX_ZOOM} aria-label="Ingrandisci la foto">
+              +
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setCrop(NO_CROP)}>
+              Rimetti al centro
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="dp-form">
         <h3>Chi ha ritrovato i segreti?</h3>
@@ -215,7 +307,7 @@ export function DiplomaEditor() {
 
       {/* copia senza animazioni né foto, usata per creare l'immagine */}
       <div className="dp-export" aria-hidden>
-        <DiplomaArt ref={exportRef} names={data.names} photo={data.photo} date={date} forExport />
+        <DiplomaArt ref={exportRef} names={data.names} photo={data.photo} photoSize={data.photoSize} crop={data.crop} date={date} forExport />
       </div>
       {printSrc && (
         // eslint-disable-next-line @next/next/no-img-element

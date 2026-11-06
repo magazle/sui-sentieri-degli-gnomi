@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import { missions, rewards } from "@/game/content";
 import { CharacterArt } from "../characters/CharacterArt";
-import { joinNames } from "./diplomaData";
+import { joinNames, NO_CROP, placePhoto, type Crop } from "./diplomaData";
 
 /** Formato verticale come un foglio A4 (1:√2). */
 export const W = 1000;
@@ -14,7 +14,13 @@ export const PHOTO = { cx: 500, cy: 560, r: 205 };
 type Props = {
   names: string[];
   photo: string | null;
+  photoSize?: { w: number; h: number };
+  crop?: Crop;
   date: string;
+  /** gesti sulla foto (trascina e pizzica), solo nell'anteprima */
+  photoHandlers?: React.DOMAttributes<SVGCircleElement>;
+  /** mostra il bordo tratteggiato che invita a sistemare la foto */
+  editing?: boolean;
   /** in esportazione la foto viene disegnata a parte, sul canvas */
   forExport?: boolean;
 };
@@ -59,7 +65,8 @@ function mushroom(x: number, y: number, s: number, k: string) {
   );
 }
 
-export const DiplomaArt = forwardRef<SVGSVGElement, Props>(function DiplomaArt({ names, photo, date, forExport }, ref) {
+export const DiplomaArt = forwardRef<SVGSVGElement, Props>(function DiplomaArt({ names, photo, photoSize, crop, date, forExport, photoHandlers, editing }, ref) {
+  const place = photo && photoSize ? placePhoto(photoSize, crop ?? NO_CROP, PHOTO) : null;
   const who = joinNames(names) || "Piccoli esploratori";
   const many = names.filter((n) => n.trim()).length > 1;
   const nameSize = who.length > 34 ? 46 : who.length > 22 ? 58 : 72;
@@ -158,7 +165,13 @@ export const DiplomaArt = forwardRef<SVGSVGElement, Props>(function DiplomaArt({
         </g>
       )}
       {photo && !forExport && (
-        <image href={photo} x={PHOTO.cx - PHOTO.r} y={PHOTO.cy - PHOTO.r} width={PHOTO.r * 2} height={PHOTO.r * 2} preserveAspectRatio="xMidYMid slice" clipPath="url(#dp-photo)" />
+        <g clipPath="url(#dp-photo)">
+          {place ? (
+            <image href={photo} x={place.x} y={place.y} width={place.w} height={place.h} preserveAspectRatio="none" />
+          ) : (
+            <image href={photo} x={PHOTO.cx - PHOTO.r} y={PHOTO.cy - PHOTO.r} width={PHOTO.r * 2} height={PHOTO.r * 2} preserveAspectRatio="xMidYMid slice" />
+          )}
+        </g>
       )}
       {/* foglie e ghiande sulla cornice */}
       {[[-150, -150, -40], [140, -160, 40], [-200, 40, -100], [196, 60, 100]].map(([dx, dy, a], i) => (
@@ -174,6 +187,13 @@ export const DiplomaArt = forwardRef<SVGSVGElement, Props>(function DiplomaArt({
           <path d="M-16 -2 Q0 -18 16 -2 Q0 6 -16 -2 Z" fill="#6a4a28" />
         </g>
       ))}
+
+      {photo && !forExport && photoHandlers && (
+        <circle cx={PHOTO.cx} cy={PHOTO.cy} r={PHOTO.r} fill="transparent" className="dp-photo-touch" {...photoHandlers} />
+      )}
+      {photo && !forExport && editing && (
+        <circle cx={PHOTO.cx} cy={PHOTO.cy} r={PHOTO.r - 6} fill="none" stroke="#ffffff" strokeWidth="5" strokeDasharray="14 12" opacity="0.9" pointerEvents="none" />
+      )}
 
       {/* nomi */}
       <text x="500" y="850" textAnchor="middle" fontFamily={BODY} fontSize="34" fill="#55604c">

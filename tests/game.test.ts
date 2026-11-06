@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { clampCrop, joinNames, MAX_ZOOM, placePhoto } from "@/components/diploma/diplomaData";
 import { allLines, missions, route, routeLength, startPoint } from "@/game/content";
 import { guide } from "@/game/guide";
 import { listLines } from "@/scripts/lines.mjs";
@@ -143,5 +144,27 @@ describe("guida verso la tappa", () => {
   });
   it("riconosce chi è lontano dal parco", () => {
     expect(guide([4.35, 50.85], m, route).farAway).toBe(true);
+  });
+});
+
+describe("foto del diploma", () => {
+  const size = { w: 1200, h: 900 };
+  const circle = { cx: 500, cy: 560, r: 205 };
+  it("la foto copre sempre tutto il cerchio", () => {
+    for (const crop of [{ zoom: 1, dx: 999, dy: -999 }, { zoom: 0.2, dx: 0, dy: 0 }, { zoom: 3, dx: -400, dy: 400 }]) {
+      const c = clampCrop(size, crop, circle.r);
+      const p = placePhoto(size, c, circle);
+      expect(p.x).toBeLessThanOrEqual(circle.cx - circle.r + 1e-6);
+      expect(p.y).toBeLessThanOrEqual(circle.cy - circle.r + 1e-6);
+      expect(p.x + p.w).toBeGreaterThanOrEqual(circle.cx + circle.r - 1e-6);
+      expect(p.y + p.h).toBeGreaterThanOrEqual(circle.cy + circle.r - 1e-6);
+    }
+  });
+  it("lo zoom resta tra 1 e il massimo", () => {
+    expect(clampCrop(size, { zoom: 0.5, dx: 0, dy: 0 }, 205).zoom).toBe(1);
+    expect(clampCrop(size, { zoom: 99, dx: 0, dy: 0 }, 205).zoom).toBe(MAX_ZOOM);
+  });
+  it("i nomi si uniscono con virgole e una sola «e»", () => {
+    expect(joinNames(["Anna", " ", "Leo", "Sofia"])).toBe("Anna, Leo e Sofia");
   });
 });
